@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 def load_and_grey(path):
-    # Convert to greyscale
+    # Converting to greyscale
     img = cv2.imread(path, cv2.IMREAD_COLOR)
     if img is None:
         raise ValueError(f"Failed to load image from: {path}")
@@ -19,13 +19,13 @@ def ensure_8bit(grey):
         return grey
     else:
         img_pil = Image.fromarray(grey)
-        img_8bit = img_pil.convert("L")   # Convert to 8-bit pixel depth image
+        img_8bit = img_pil.convert("L")   # Converting to 8-bit pixel depth image
         return np.array(img_8bit, dtype=np.uint8)
 
 
 def pdf_cdf(grey):
-    # Compute PDF and CDF
-    hist = np.bincount(grey.ravel(), minlength=256).astype(np.float64)
+    # Computing PDF and CDF
+    hist = np.bincount(grey.ravel(), minlength=256).astype(np.float64)   # Flatten to 1D
     pdf = hist / hist.sum()
     cdf = np.cumsum(pdf)
     cdf[-1] = 1.0   # Ensure last value is exactly 1.0
@@ -33,31 +33,26 @@ def pdf_cdf(grey):
 
 
 def mapping_test(test_cdf, ref_cdf):
-    # Build mapping from test image to reference
+    # Mapping from test image to reference
     mapping = np.zeros(256, dtype=np.uint8)
+    ref_levels = np.arange(256)
+    
     for g in range(256):
         s_val = test_cdf[g]
-        idx = np.searchsorted(ref_cdf, s_val, side="left")
-        if idx == 0:
-            k = 0
-        elif idx >= 256:
-            k = 255
-        else:
-            if abs(ref_cdf[idx] - s_val) < abs(ref_cdf[idx-1] - s_val):
-                k = idx
-            else:
-                k = idx - 1
+        # Computing absolute differences with all reference CDF values
+        differences = np.abs(ref_cdf - s_val)
+        k = np.argmin(differences)
         mapping[g] = k
+    
     return mapping
 
 
 def apply_mapping(grey, mapping):
-    # Apply intensity mapping
     return mapping[grey]
 
 
 def save_pdf_cdf_side_by_side(pdf, cdf, filename, title):
-    # Plot PDF and CDF side by side
+    # Plotting PDF and CDF
     fig, axes = plt.subplots(1, 2, figsize=(12,4))
     
     axes[0].bar(np.arange(256), pdf, color='blue')
@@ -108,4 +103,3 @@ if __name__ == "__main__":
     matched_pdf, matched_cdf = pdf_cdf(matched_test)
     save_pdf_cdf_side_by_side(matched_pdf, matched_cdf, "thist_220623J.png", "Test After Processing")
 
-    print("All images and side-by-side histograms saved successfully.")
