@@ -1,6 +1,6 @@
-## Histogram Matching
+## Histogram Processing
 
-This project contains a Python program (`220623J.py`) that performs histogram matching. Histogram matching is a technique used to adjust the pixel intensity distribution of a source image so that it matches the histogram of a reference image. This is useful for image normalization and visual consistency across different images.
+This project contains a Python program (`220623J.py`) that performs histogram processing. It adjusts the pixel intensity distribution of a test image so that it matches the histogram of a reference image. This is useful for visual consistency (same exposure or same contrast) across different images.
 
 ### How it works
 
